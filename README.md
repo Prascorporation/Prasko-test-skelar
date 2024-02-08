@@ -15,10 +15,10 @@ To get started with the application, follow these steps:
 
 Once the application is running, you can access the following endpoints:
 
-POST `/auth/login`: Endpoint for user login.
-POST `/auth/logout`: Endpoint for user logout.
-GET `/users`: Endpoint to view all users (requires authentication).
-GET `/user/{username}`: Endpoint to view a specific user by username (requires authentication).
+## POST `/auth/login`: Endpoint for user login.
+## POST `/auth/logout`: Endpoint for user logout.
+## GET `/users`: Endpoint to view all users (requires authentication).
+## GET `/user/{username}`: Endpoint to view a specific user by username (requires authentication).
 
 ### Example Login
 
