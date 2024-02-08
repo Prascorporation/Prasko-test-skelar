@@ -2,18 +2,18 @@
 
 return [
     [
-        'name' => 'John Doe',
+        'name' => 'John',
         'email' => 'john@example.com',
         'age' => 30
     ],
     [
-        'name' => 'Jane Smith',
+        'name' => 'Jane',
         'email' => 'jane@example.com',
         'age' => 25
     ],
     [
         'name' => 'Tom',
-        'email' => '',
+        'email' => 'tom@example.com',
         'age' => 35
     ]
 ];

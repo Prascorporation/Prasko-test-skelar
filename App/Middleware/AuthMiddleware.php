@@ -2,16 +2,18 @@
 
 namespace App\Middleware;
 
-class AuthMiddleware
+use App\Middleware\AbstractMiddleware;
+
+class AuthMiddleware extends AbstractMiddleware
 {
-    public function handle($request, $next)
+    public function handle()
     {
-        if (!isset($_SESSION['user'])) {
+        session_start();
+        if (! isset($_SESSION['user'])) {
             http_response_code(401);
             echo 'Unauthorized';
             exit();
         }
-
-        return $next($request);
+        return;
     }
 }
