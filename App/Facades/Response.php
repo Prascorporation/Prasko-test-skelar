@@ -11,7 +11,7 @@ class Response
      * @param int $statusCode The HTTP status code.
      * @return void
      */
-    public static function json($data, int $statusCode): void
+    public static function json(mixed $data, int $statusCode): void
     {
         http_response_code($statusCode);
         header('Content-Type: application/json');

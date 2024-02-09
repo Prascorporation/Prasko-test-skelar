@@ -10,9 +10,9 @@ use InvalidArgumentException;
 
 class AuthController
 {
-    /*
-    * @var AuthService
-    */
+    /**
+     * @var AuthService
+     */
     private AuthService $authService;
 
     /**

@@ -8,6 +8,9 @@ use App\Middleware\AuthMiddleware;
 
 class Router
 {
+    /**
+     * @var array
+     */
     private array $routes;
 
     public function __construct()
@@ -20,7 +23,7 @@ class Router
      * @param string $requestUri
      * @return void
      */
-    public function dispatch($requestUri)
+    public function dispatch(string $requestUri)
     {
         $requestUri = rtrim($requestUri, '/');
 
