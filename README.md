@@ -26,3 +26,8 @@ To login, use the following credentials:
 
 - Username: `Artem`
 - Password: `123123`
+
+You should provide it in body raw: {
+    "username": "Artem",
+    "password": "123123"
+}
