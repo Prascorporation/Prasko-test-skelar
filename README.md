@@ -26,5 +26,3 @@ To login, use the following credentials:
 
 - Username: `Artem`
 - Password: `123123`
-
-## Routes
