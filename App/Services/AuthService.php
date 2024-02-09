@@ -27,6 +27,9 @@ class AuthService
         return false;
     }
 
+    /**
+     * @return void
+     */
     public function logout(): void
     {
         session_start();

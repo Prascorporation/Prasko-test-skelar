@@ -2,7 +2,9 @@
 
 namespace App\Exceptions;
 
-class UserNotFoundException extends \Exception
+use Exception;
+
+class UserNotFoundException extends Exception
 {
     /**
      * UserNotFoundException constructor

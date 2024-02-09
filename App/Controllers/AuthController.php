@@ -4,7 +4,9 @@ namespace App\Controllers;
 
 use App\Enums\ResponseStatusCode;
 use App\Facades\Logger;
+use App\Facades\Response;
 use App\Services\AuthService;
+use InvalidArgumentException;
 
 class AuthController
 {
@@ -27,20 +29,31 @@ class AuthController
      */
     public function login(array $params): void
     {
+        try {
+            $this->validateLogin($params);
+        } catch (InvalidArgumentException $e) {
+            Response::text(
+                $e->getMessage(),
+                ResponseStatusCode::BAD_REQUEST->value
+            );
+            return;
+        }
+
         $username = $params['username'];
         $password = $params['password'];
 
         $positiveResponse = $this->authService->login($username, $password);
 
         if ($positiveResponse) {
-            http_response_code(ResponseStatusCode::OK->value);
             $_SESSION['user'] = $username;
-            echo "Logged in";
+
+            Response::text("Logged in", ResponseStatusCode::OK->value);
+
             Logger::log("User $username logged in");
         } else {
-            http_response_code(ResponseStatusCode::UNAUTHORIZED->value);
-            echo "Wrong credentials provided";
+
             Logger::log("Failed login attempt for user $username");
+            Response::text("Failed login attempt", ResponseStatusCode::UNAUTHORIZED->value);
         }
     }
 
@@ -51,10 +64,23 @@ class AuthController
     {
         session_start();
         session_destroy();
-        http_response_code(ResponseStatusCode::OK->value);
 
         Logger::log("User logged out");
 
-        echo "Logged out";
+        Response::text("Logged out", ResponseStatusCode::OK->value);
+    }
+
+    /**
+     * @param array $params
+     * @return void
+     */
+    private function validateLogin(array $params): void
+    {
+        if (
+            ! isset($params['username']) ||
+            ! isset($params['password'])
+        ) {
+            throw new InvalidArgumentException("username and password are required");
+        }
     }
 }

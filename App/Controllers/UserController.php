@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Enums\ResponseStatusCode;
 use App\Exceptions\UserNotFoundException;
 use App\Facades\Logger;
+use App\Facades\Response;
 use App\Services\UserRetrieverService;
 
 class UserController
@@ -28,8 +29,10 @@ class UserController
      */
     public function index(): void
     {
-        header('Content-Type: application/json');
-        echo json_encode($this->userRetrieverService->all());
+        Response::json(
+            $this->userRetrieverService->all(),
+            ResponseStatusCode::OK->value
+        );
     }
 
     /**
@@ -39,15 +42,18 @@ class UserController
     public function show(string $name): void
     {
         try {
-            $user = $this->userRetrieverService->find($name);
-            header('Content-Type: application/json');
-            echo json_encode($user);
+            Response::json(
+                $this->userRetrieverService->find($name),
+                ResponseStatusCode::OK->value
+            );
         } catch (UserNotFoundException $e) {
 
             Logger::log($e->getMessage());
 
-            http_response_code(ResponseStatusCode::NOT_FOUND->value);
-            echo $e->getMessage();
+            Response::text(
+                $e->getMessage(),
+                ResponseStatusCode::NOT_FOUND->value
+            );
         }
     }
 }

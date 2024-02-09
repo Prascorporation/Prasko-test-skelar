@@ -2,6 +2,8 @@
 
 namespace App\Routing;
 
+use App\Enums\ResponseStatusCode;
+use App\Facades\Response;
 use App\Middleware\AuthMiddleware;
 
 class Router
@@ -29,12 +31,12 @@ class Router
 
                 $params = $this->getParams($requestType, $matches);
 
-                if (in_array('authentificate', $controllerAction)) {
+                if (in_array('authenticate', $controllerAction)) {
                     $middleware = new AuthMiddleware();
                     $middleware->handle();
                 }
-                
-                $this->checkRequestType($requestType, $controllerAction);
+
+                $this->checkRequestType($requestType, $controllerAction[2]);
 
                 list($controllerName, $actionName) = explode('@', $controllerAction[0]);
 
@@ -54,7 +56,7 @@ class Router
      * @param array $matches
      * @return array|string
      */
-    private function getParams($requestType, $matches): array|string
+    private function getParams(string $requestType, array $matches): array|string
     {
         if ($requestType == 'GET') {
             array_slice($matches, 1);
@@ -66,14 +68,17 @@ class Router
 
     /**
      * @param string $requestType
-     * @param array $controllerAction
+     * @param string $methodRequestType
      * @return void
      */
-    private function checkRequestType(string $requestType, array $controllerAction)
+    private function checkRequestType(string $requestType, string $methodRequestType)
     {
-        if ($requestType !== $controllerAction[2]) {
-            http_response_code(405);
-            echo 'Method Not Allowed';
+        if ($requestType !== $methodRequestType) {
+
+            Response::text(
+                'Method not allowed',
+                ResponseStatusCode::NOT_ALLOWED->value
+            );
             exit();
         }
     }
