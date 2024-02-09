@@ -2,18 +2,24 @@
 
 namespace App\Middleware;
 
+use App\Enums\ResponseStatusCode;
+use App\Facades\Response;
 use App\Middleware\AbstractMiddleware;
 
 class AuthMiddleware extends AbstractMiddleware
 {
+    /**
+     * @return void
+     */
     public function handle()
     {
         session_start();
-        if (! isset($_SESSION['user'])) {
-            http_response_code(401);
-            echo 'Unauthorized';
+        if (!isset($_SESSION['user'])) {
+            Response::text(
+                'Unauthorized',
+                ResponseStatusCode::UNAUTHORIZED->value
+            );
             exit();
         }
-        return;
     }
 }
