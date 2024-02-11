@@ -21,7 +21,6 @@ class AuthService
             && $password === $credentials['password']
         ) {
             $_SESSION['user'] = $username;
-            Logger::log("User $username logged in");
             return true;
         }
         return false;
