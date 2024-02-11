@@ -1,8 +1,10 @@
 <?php
-//to add your route use format: route url => controller@action, middleware, request type
-return  [
-    '/users' => ['UserController@index', 'authenticate', 'GET'],
-    '/user/([^/]+)' => ['UserController@show', 'authenticate', 'GET'],
-    '/auth/login' => ['AuthController@login', 'no_middleware', 'POST'],
-    '/auth/logout' => ['AuthController@logout', 'no_middleware', 'POST'],
+
+use App\Routing\Route;
+
+return [
+    Route::get('/users', 'UserController@index')->middleware('authenticate'),
+    Route::get('/user/{$userName}', 'UserController@show')->middleware('authenticate'),
+    Route::post('/auth/login', 'AuthController@login'),
+    Route::post('/auth/logout', 'AuthController@logout'),
 ];

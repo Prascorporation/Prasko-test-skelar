@@ -3,86 +3,67 @@
 namespace App\Routing;
 
 use App\Enums\ResponseStatusCode;
+use App\Exceptions\MethodNotAllowedException;
+use App\Exceptions\PageNotFoundException;
 use App\Facades\Response;
-use App\Middleware\AuthMiddleware;
 
 class Router
 {
-    /**
-     * @var array
-     */
-    private array $routes;
+    private array $routes = [];
 
     public function __construct()
+    {
+        $this->loadRoutes();
+    }
+
+    public function dispatch(string $requestUri, string $requestType)
+    {
+        foreach ($this->routes as $route) {
+            $pattern = $this->getUriPattern($route->uri);
+            if (preg_match($pattern, $requestUri)) {
+                echo 'Route found';
+                return;
+                $this->handleRoute($route->controllerAction);
+            }
+        }
+        throw new PageNotFoundException($requestUri);
+    }
+
+    private function isMethodAllowed(string $routeMethod, string $requestMethod)
+    {
+        return $routeMethod === $requestMethod;
+    }
+
+    private function loadRoutes()
     {
         $this->routes = include(__DIR__ . '/../routes.php');
     }
 
-    /**
-     * main method to find the route and dispatch the request
-     * @param string $requestUri
-     * @return void
-     */
-    public function dispatch(string $requestUri)
+    public function getUriPattern(string $uri): string
     {
-        $requestUri = rtrim($requestUri, '/');
-
-        foreach ($this->routes as $pattern => $controllerAction) {
-
-            if (preg_match("#^{$pattern}$#", $requestUri, $matches)) {
-                $requestType = $_SERVER['REQUEST_METHOD'];
-
-                $params = $this->getParams($requestType, $matches);
-
-                if (in_array('authenticate', $controllerAction)) {
-                    $middleware = new AuthMiddleware();
-                    $middleware->handle();
-                }
-
-                $this->checkRequestType($requestType, $controllerAction[2]);
-
-                list($controllerName, $actionName) = explode('@', $controllerAction[0]);
-
-                $name = "App\Controllers\\$controllerName";
-                $controller = new $name();
-
-                $controller->$actionName($params);
-
-                exit();
-            }
+        if ($this->hasDynamicParameter($uri)) {
+            return $this->getDynamicUriPattern($uri);
         }
+
+        $escapedUri = preg_quote($uri, '#');
+        return '#^' . $escapedUri . '/?$#';
     }
 
-    /**
-     * 
-     * @param string $requestType
-     * @param array $matches
-     * @return array|string
-     */
-    private function getParams(string $requestType, array $matches): array|string
+    private function hasDynamicParameter(string $uri): bool
     {
-        if ($requestType == 'GET') {
-            array_slice($matches, 1);
-            return count($matches) > 1 ? end($matches) : $matches[0];
-        } elseif ($requestType == 'POST') {
-            return json_decode(file_get_contents('php://input'), true);
-        }
+        return strpos($uri, '{$') !== false;
     }
 
-    /**
-     * @param string $requestType
-     * @param string $methodRequestType
-     * @return void
-     */
-    private function checkRequestType(string $requestType, string $methodRequestType)
+    private function getDynamicUriPattern(string $uri): string
     {
-        if ($requestType !== $methodRequestType) {
+        $uri = preg_replace('/{\$[^}]+}/', '([^/]+)', $uri);
 
-            Response::text(
-                'Method not allowed',
-                ResponseStatusCode::NOT_ALLOWED->value
-            );
-            exit();
-        }
+        $uri .= '\/?\d*';
+
+        return '#^' . $uri . '$#';
+    }
+    private function handleRoute(string $controllerAction)
+    {
+        list($controller, $action) = explode('@', $controllerAction);
     }
 }

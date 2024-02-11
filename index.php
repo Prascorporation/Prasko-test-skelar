@@ -2,12 +2,22 @@
 
 require_once __DIR__ . '/vendor/autoload.php';
 
+use App\Enums\ResponseStatusCode;
+use App\Exceptions\PageNotFoundException;
+use App\Facades\Response;
 use App\Routing\Router;
 
 $requestUri = $_SERVER['REQUEST_URI'];
 
-$router = new Router($requestUri);
-$router->dispatch($requestUri);
+$requestMethod = $_SERVER['REQUEST_METHOD'];
 
-http_response_code(404);
-echo '404 Not Found';
+$router = new Router();
+
+try {
+    $router->dispatch($requestUri, $requestMethod);
+} catch (PageNotFoundException $e) {
+    Response::text(
+        $e->getMessage(),
+        ResponseStatusCode::NOT_FOUND->value
+    );
+}
