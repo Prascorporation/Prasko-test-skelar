@@ -5,65 +5,103 @@ namespace App\Routing;
 use App\Enums\ResponseStatusCode;
 use App\Exceptions\MethodNotAllowedException;
 use App\Exceptions\PageNotFoundException;
-use App\Facades\Response;
+use App\Middleware\Aliases;
+use App\Services\RouterService;
 
 class Router
 {
+    /**
+     * @var array
+     */
     private array $routes = [];
 
+    /**
+     * @var RouterService
+     */
+    private RouterService $routerService;
+
+    /**
+     * Router constructor
+     */
     public function __construct()
     {
         $this->loadRoutes();
+        $this->routerService = new RouterService();
     }
 
-    public function dispatch(string $requestUri, string $requestType)
+    /**
+     * @param string $requestUri
+     * @param string $requestType
+     * @return void
+     */
+    public function dispatch(string $requestUri, string $requestType): void
     {
         foreach ($this->routes as $route) {
-            $pattern = $this->getUriPattern($route->uri);
+
+            $pattern = $this->routerService->getUriPattern($route->uri);
+
             if (preg_match($pattern, $requestUri)) {
-                echo 'Route found';
+                if (! $this
+                    ->routerService
+                    ->isMethodAllowed($route->requestType, $requestType)) {
+                    throw new MethodNotAllowedException($requestType);
+                }
+
+                if ($route->middleware) {
+                    $this->handleMiddleware($route->middleware);
+                }
+
+                $this->callController($route, $requestUri);
                 return;
-                $this->handleRoute($route->controllerAction);
             }
         }
+
         throw new PageNotFoundException($requestUri);
     }
 
-    private function isMethodAllowed(string $routeMethod, string $requestMethod)
-    {
-        return $routeMethod === $requestMethod;
-    }
-
-    private function loadRoutes()
+    /**
+     * @return void
+     */
+    private function loadRoutes(): void
     {
         $this->routes = include(__DIR__ . '/../routes.php');
     }
 
-    public function getUriPattern(string $uri): string
+    /**
+     * @param Route $route
+     * @param string $requestUri
+     * @return void
+     */
+    private function callController(Route $route, string $requestUri): void
     {
-        if ($this->hasDynamicParameter($uri)) {
-            return $this->getDynamicUriPattern($uri);
-        }
+        $parameters = $this->getParameters($route->requestType, $requestUri);
 
-        $escapedUri = preg_quote($uri, '#');
-        return '#^' . $escapedUri . '/?$#';
+        list($controller, $action) = explode('@', $route->controllerAction);
+        $controller = "App\\Controllers\\$controller";
+
+        (new $controller())->$action($parameters);
     }
 
-    private function hasDynamicParameter(string $uri): bool
+    /**
+     * @param string $middleware
+     * @return mixed
+     */
+    private function getParameters(string $requestType, string $requestUri): mixed
     {
-        return strpos($uri, '{$') !== false;
+        return match ($requestType) {
+            'GET' =>  basename(parse_url($requestUri, PHP_URL_PATH)),
+            'POST' => json_decode(file_get_contents('php://input'), true),
+            default => null,
+        };
     }
 
-    private function getDynamicUriPattern(string $uri): string
+    /**
+     * @param string $middleware
+     * @return void
+     */
+    private function handleMiddleware(string $middleware): void
     {
-        $uri = preg_replace('/{\$[^}]+}/', '([^/]+)', $uri);
-
-        $uri .= '\/?\d*';
-
-        return '#^' . $uri . '$#';
-    }
-    private function handleRoute(string $controllerAction)
-    {
-        list($controller, $action) = explode('@', $controllerAction);
+        $middleware = "App\\Middleware\\$middleware";
+        (new $middleware())->handle();
     }
 }

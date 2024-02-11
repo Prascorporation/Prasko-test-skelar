@@ -24,10 +24,10 @@ class AuthController
     }
 
     /**
-     * @param array $params
+     * @param ?array $params
      * @return void
      */
-    public function login(array $params): void
+    public function login(?array $params): void
     {
         try {
             $this->validateLogin($params);
@@ -71,10 +71,10 @@ class AuthController
     }
 
     /**
-     * @param array $params
+     * @param ?array $params
      * @return void
      */
-    private function validateLogin(array $params): void
+    private function validateLogin(?array $params): void
     {
         if (
             ! isset($params['username']) ||

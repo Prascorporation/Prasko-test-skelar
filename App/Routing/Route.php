@@ -58,7 +58,6 @@ class Route
         return new static($uri, $controllerAction, 'POST');
     }
 
-
     /**
      * @param string $middleware
      * @return Route
@@ -67,13 +66,5 @@ class Route
     {
         $this->middleware = $middleware;
         return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getMiddleware(): ?string
-    {
-        return $this->middleware;
     }
 }
