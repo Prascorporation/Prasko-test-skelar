@@ -39,9 +39,11 @@ class Router
             $pattern = $this->routerService->getUriPattern($route->uri);
 
             if (preg_match($pattern, $requestUri)) {
-                if (! $this
-                    ->routerService
-                    ->isMethodAllowed($route->requestType, $requestType)) {
+                if (
+                    ! $this
+                        ->routerService
+                        ->isMethodAllowed($route->requestType, $requestType)
+                ) {
                     throw new MethodNotAllowedException($requestType);
                 }
 
