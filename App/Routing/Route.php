@@ -4,7 +4,6 @@ namespace App\Routing;
 
 class Route
 {
-
     /**
      * @var string
      */

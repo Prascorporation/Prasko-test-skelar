@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Facades\Logger;
 
 class AuthService
 {

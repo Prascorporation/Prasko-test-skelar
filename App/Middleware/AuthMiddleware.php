@@ -11,7 +11,7 @@ class AuthMiddleware extends AbstractMiddleware
     /**
      * @return void
      */
-    public function handle()
+    public function handle(): void
     {
         session_start();
         if (!isset($_SESSION['user'])) {

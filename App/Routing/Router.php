@@ -2,10 +2,8 @@
 
 namespace App\Routing;
 
-use App\Enums\ResponseStatusCode;
 use App\Exceptions\MethodNotAllowedException;
 use App\Exceptions\PageNotFoundException;
-use App\Middleware\Aliases;
 use App\Services\RouterService;
 
 class Router
